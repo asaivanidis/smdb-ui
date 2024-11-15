@@ -1,12 +1,16 @@
 import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
 import api from '../smdb-api';
 
+import { useNavigate } from 'react-router-dom';
+
 // Using material-ui for the ui
-import { Card, CardContent, Button, Typography } from '@mui/material';
+import { Grid2, Card, CardActionArea, CardMedia, CardContent, Typography, Button } from '@mui/material';
+
+const fallbackImage = 'https://fakeimg.pl/250x330'; // Fallback image URL
 
 const MoviesList = () => {
     const [movies, setMovies] = useState([]);
+    const navigate = useNavigate();
 
     useEffect(() => {
         api.get('/')
@@ -22,22 +26,68 @@ const MoviesList = () => {
             .catch(error => console.error('Error deleting movie:', error));
     };
 
+    const handleCardClick = (id) => {
+        navigate(`/movie/${id}`);
+    };
+
     return (
-        <div className="container">
-            {movies.map(movie => (
-                <Card key={movie.movieId} variant="outlined" className="mb-4">
-                    <CardContent>
-                        <Typography variant="h5" component="div">{movie.title}</Typography>
-                        <Typography color="text.secondary">{movie.description}</Typography>
-                        <div className="mt-2">
-                            <Link to={`/movie/${movie.movieId}`}>
-                                <Button variant="contained" color="primary">View Details</Button>
-                            </Link>
-                            <Button variant="outlined" color="error" onClick={() => deleteMovie(movie.movieId)}>Delete</Button>
-                        </div>
-                    </CardContent>
-                </Card>
-            ))}
+        <div style={{ padding: '30px' }}>
+            
+            <Grid2 container spacing={5}>
+                {movies.map((movie) => (
+                    <Grid2 item xs={12} sm={6} md={4} key={movie.movieId}> {/* Adjust poster size based on screen size */}
+                        <Card
+                            sx={{ 
+                                width: 250, // Fixed width
+                                height: 450, // Fixed height for making sure all movies take up the same space
+                                display: 'flex',
+                                flexDirection: 'column',
+                                
+                            }}
+                        >
+                            <CardActionArea onClick={() => handleCardClick(movie.movieId)}>
+                                {/* Movie Poster */}
+                                <CardMedia  
+                                    component="img"
+                                    height="300"
+                                    image={movie.imageUrl || fallbackImage} // If no url is stored in the database load the fallback image 
+                                    alt={movie.title}
+                                    sx={{
+                                        cursor: 'pointer',
+                                        '&:hover': {
+                                            filter: 'brightness(0.8)', // Darken the poster while hovering over
+                                        }
+                                    }}
+                                    onError={(e) => {
+                                        e.target.onerror = null;
+                                        e.target.src = fallbackImage; // If the image cannot be loaded load the fallback image
+                                    }}    
+                                />
+                                </CardActionArea>
+                            <CardContent>
+                                {/* Movie Title */}
+                                <Typography variant="h6" component="div" >
+                                    {movie.title}
+                                </Typography>
+                                {/* Movie Description */}
+                                <Typography variant="body2" color="text.secondary" noWrap> {/* Limit the description to one line */}
+                                    {movie.description}
+                                </Typography>
+                            </CardContent>    
+                            <CardContent sx={{ textAlign: 'center', paddingTop: 0 }}>
+                                <Button
+                                    variant="contained"
+                                    color="error"
+                                    onClick={() => deleteMovie(movie.movieId)}
+                                    sx={{ marginTop: '10px' }}
+                                >
+                                    Delete
+                                </Button>
+                            </CardContent>
+                        </Card>
+                    </Grid2>
+                ))}
+            </Grid2>
         </div>
     );
 };
