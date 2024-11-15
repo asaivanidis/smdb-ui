@@ -5,7 +5,6 @@ import api from '../smdb-api';
 // Using material-ui for the ui
 import { Card, CardContent, Button, Typography } from '@mui/material';
 
-
 const MoviesList = () => {
     const [movies, setMovies] = useState([]);
 
