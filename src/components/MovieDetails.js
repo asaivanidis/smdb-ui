@@ -34,7 +34,7 @@ const MovieDetails = () => {
     // Show a loading icon while fetching results
     if (loading) {
         return (
-            <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
+            <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '50vh' }}>
                 <CircularProgress />
             </Box>
         );
@@ -43,7 +43,7 @@ const MovieDetails = () => {
     // if movie is not found or there is a network error show this instead
     if (error) {
         return (
-            <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
+            <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '50vh' }}>
                 <Typography variant="h6">Movie not found.</Typography>
             </Box>
         );
