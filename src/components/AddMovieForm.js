@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import { Box, Typography, TextField, Button, Card, CardContent } from '@mui/material';
-import api from '../smdb-api';
+import { Box, Typography, TextField, Button, Card, CardContent, CircularProgress } from '@mui/material';
+import { addMovie } from '../smdb-api';
 
 const AddMovieForm = () => {
     const [title, setTitle] = useState('');
@@ -10,8 +10,9 @@ const AddMovieForm = () => {
     const [trailerUrl, setTrailerUrl] = useState('');
     const [status, setStatus] = useState('idle'); // State to track status
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
+        setStatus('loading');
         const newMovie = {
             title,
             description,
@@ -19,26 +20,28 @@ const AddMovieForm = () => {
             imageUrl,
             trailerUrl,
         };
-        console.log(newMovie)
-        api.post('/', newMovie)
-            .then(() => {
-                // Movie added successfully
-                setStatus('success'); 
-                // Reset the form fields
-                setTitle('');
-                setDescription('');
-                setReleaseDate('');
-                setImageUrl('');
-                setTrailerUrl('');
 
-                // Hide success message after 2 seconds
-                setTimeout(() => setStatus('idle'), 2000);
-            })
-            .catch((error) => {
-                setStatus('error');
-                console.error('Error adding movie:', error);
-                setTimeout(() => setStatus('idle'), 2000);
-            });
+        try {
+            console.log(newMovie) // log the movie object for debugging
+
+            await addMovie(newMovie);
+            // Movie added successfully
+            setStatus('success'); 
+            // Reset the form fields
+            setTitle('');
+            setDescription('');
+            setReleaseDate('');
+            setImageUrl('');
+            setTrailerUrl('');
+
+            // Hide success message after 2 seconds
+            setTimeout(() => setStatus('idle'), 2000);
+        }
+        catch (error){
+            setStatus('error');
+            console.error('Error adding movie:', error);
+            setTimeout(() => setStatus('idle'), 2000);
+        }
     };
 
     return (
@@ -57,6 +60,7 @@ const AddMovieForm = () => {
                             value={title}
                             onChange={(e) => setTitle(e.target.value)}
                             required
+                            disabled={status === 'loading'}
                         />
                         {/* Description Field */}
                         <TextField
@@ -68,6 +72,7 @@ const AddMovieForm = () => {
                             value={description}
                             onChange={(e) => setDescription(e.target.value)}
                             required
+                            disabled={status === 'loading'}
                         />
                         {/* Release Date Field */}
                         <TextField
@@ -79,6 +84,7 @@ const AddMovieForm = () => {
                             onChange={(e) => setReleaseDate(e.target.value)}
                             slotProps={{inputLabel: {shrink : true}}}
                             required
+                            disabled={status === 'loading'}
                         />
                         {/* Image URL Field */}
                         <TextField
@@ -87,6 +93,7 @@ const AddMovieForm = () => {
                             margin="normal"
                             value={imageUrl}
                             onChange={(e) => setImageUrl(e.target.value)}
+                            disabled={status === 'loading'}
                         />
                         {/* Trailer URL Field */}
                         <TextField
@@ -95,30 +102,46 @@ const AddMovieForm = () => {
                             margin="normal"
                             value={trailerUrl}
                             onChange={(e) => setTrailerUrl(e.target.value)}
+                            disabled={status === 'loading'}
                         />
                         {/* Submit Button */}
-                        <Button
-                            type="submit"
-                            variant="contained"
-                            color={
-                                status === 'success'
-                                    ? 'success'
+                        <Box sx={{ marginTop: 2, position: 'relative' }}>
+                            <Button
+                                type="submit"
+                                variant="contained"
+                                color={
+                                    status === 'success'
+                                        ? 'success'
+                                        : status === 'error'
+                                        ? 'error'
+                                        : 'primary'
+                                }
+                                fullWidth
+                                disabled={status === 'loading'}
+                                sx={{
+                                    marginTop: 2,
+                                    transition: 'background-color 0.3s ease',
+                                }}
+                            >
+                                {status === 'success'
+                                    ? 'Movie Added!'
                                     : status === 'error'
-                                    ? 'error'
-                                    : 'primary'
-                            }
-                            fullWidth
-                            sx={{
-                                marginTop: 2,
-                                transition: 'background-color 0.3s ease',
-                            }}
-                        >
-                            {status === 'success'
-                                ? 'Movie Added!'
-                                : status === 'error'
-                                ? 'Adding Failed'
-                                : 'Add Movie'}
-                        </Button>
+                                    ? 'Adding Failed'
+                                    : 'Add Movie'}
+                            </Button>
+                            {status === 'loading' && (
+                                <CircularProgress // Add a spinner while waiting for the result
+                                    size = {24}
+                                    sx = {{
+                                        position: 'absolute',
+                                        top: '50%',
+                                        left: '50%',
+                                        transform: 'translate(-50%, -50%)', // Center the spinner
+                                        pointerEvents: 'none', // Allow clicks to pass through
+                                    }}
+                                />
+                            )}
+                        </Box>
                     </form>
                 </CardContent>
             </Card>
