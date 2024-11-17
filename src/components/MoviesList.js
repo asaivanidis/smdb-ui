@@ -4,30 +4,47 @@ import api from '../smdb-api';
 import { useNavigate } from 'react-router-dom';
 
 // Using material-ui for the ui
-import { Grid2, Card, CardActionArea, CardMedia, CardContent, Typography, Button } from '@mui/material';
+import { Grid2, Card, CardActionArea, CardMedia, CardContent, Typography, Button, Dialog, DialogTitle, DialogActions } from '@mui/material';
 
 const fallbackImage = 'https://fakeimg.pl/250x330'; // Fallback image URL
 
 const MoviesList = () => {
     const [movies, setMovies] = useState([]);
+    const [confirmOpen, setConfirmOpen] = useState(false); // State to track confirmation dialog
+    const [movieToDelete, setMovieToDelete] = useState(null); // State to track which movie to delete
     const navigate = useNavigate();
 
+    
     useEffect(() => {
         api.get('/')
             .then(response => setMovies(response.data))
             .catch(error => console.error('Error fetching movies:', error));
     }, []);
 
-    const deleteMovie = (id) => {
-        api.delete(`/${id}`)
-            .then(() => {
-                setMovies(movies.filter(movie => movie.movieId !== id));
-            })
-            .catch(error => console.error('Error deleting movie:', error));
-    };
-
     const handleCardClick = (id) => {
         navigate(`/movie/${id}`);
+    };
+
+    const openConfirmDialog = (movieId) => {
+        setMovieToDelete(movieId);
+        setConfirmOpen(true);
+    };
+
+    const handleDelete = () => {
+        if (movieToDelete) {
+            api.delete(`/${movieToDelete}`)
+                .then(() => {
+                    setMovies(movies.filter(movie => movie.movieId !== movieToDelete));
+                    setConfirmOpen(false);
+                    setMovieToDelete(null);
+                })
+                .catch(error => console.error('Error deleting movie:', error));
+        }
+    };
+
+    const closeConfirmDialog = () => {
+        setConfirmOpen(false);
+        setMovieToDelete(null);
     };
 
     return (
@@ -78,7 +95,7 @@ const MoviesList = () => {
                                 <Button
                                     variant="contained"
                                     color="error"
-                                    onClick={() => deleteMovie(movie.movieId)}
+                                    onClick={() => openConfirmDialog(movie.movieId)}
                                     sx={{ marginTop: '10px' }}
                                 >
                                     Delete
@@ -88,6 +105,18 @@ const MoviesList = () => {
                     </Grid2>
                 ))}
             </Grid2>
+            {/* Confirmation Dialog */}
+            <Dialog open={confirmOpen} onClose={closeConfirmDialog}>
+                <DialogTitle>Are you sure you want to delete this movie?</DialogTitle>
+                <DialogActions>
+                    <Button onClick={closeConfirmDialog} color="primary">
+                        Cancel
+                    </Button>
+                    <Button onClick={handleDelete} color="error">
+                        Delete
+                    </Button>
+                </DialogActions>
+            </Dialog>
         </div>
     );
 };

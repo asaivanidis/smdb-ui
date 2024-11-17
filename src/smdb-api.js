@@ -28,6 +28,7 @@ export const addMovie = async (movieData) => {
     }
     catch (error){
         console.error('Error adding movie:', error);
+        throw error; //send the error to the caller
     }
 };
 
