@@ -172,19 +172,6 @@ const AddMovieForm = () => {
                             disabled={status === 'loading'}
                         />
                         {/* Cover Image Upload */}
-                        <Button
-                            variant="contained"
-                            component="label"
-                            sx={{ marginTop: 2 }}
-                            disabled={status === 'loading'}
-                        >
-                            Upload Cover Image
-                            <input
-                                type="file"
-                                hidden
-                                onChange={handleCoverUpload}
-                            />
-                        </Button>
                         {coverImage && (
                             <Box sx={{ marginTop: 2, position: 'relative', }}>
                                 <img
@@ -200,27 +187,29 @@ const AddMovieForm = () => {
                                 </IconButton>
                             </Box>
                         )}
-                        {/* Additional Images Upload */}
-                        <Button
+                        {!coverImage && (
+                            <Button
                             variant="contained"
                             component="label"
                             sx={{ marginTop: 2 }}
                             disabled={status === 'loading'}
                         >
-                            Upload Additional Images
+                            Upload Cover Image
                             <input
                                 type="file"
-                                multiple
                                 hidden
-                                onChange={handleAdditionalUpload}
+                                onChange={handleCoverUpload}
                             />
                         </Button>
+                        )}
+                        
+
+                        {/* Additional Images Upload */}
                         {additionalImages.length > 0 && (
                             <Box sx={{ marginTop: 2 }}>
-                                <Typography>Uploaded Additional Images:</Typography>
                                 <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap' }}>
                                     {additionalImages.map((url, index) => (
-                                        <Box sx={{ marginTop: 2, position: 'relative', }}>
+                                        <Box sx={{ marginTop: 1, position: 'relative', }}>
                                             <img
                                                 key={index}
                                                 src={url}
@@ -238,8 +227,23 @@ const AddMovieForm = () => {
                                 </Box>
                             </Box>
                         )}
+                        <Button
+                            variant="contained"
+                            component="label"
+                            sx={{ marginTop: 2 }}
+                            disabled={status === 'loading'}
+                        >
+                            Upload Additional Images
+                            <input
+                                type="file"
+                                multiple
+                                hidden
+                                onChange={handleAdditionalUpload}
+                            />
+                        </Button>
+                        
                         {/* Trailer URL Field */}
-                        <TextField
+                        <TextField sx={{marginTop: 4}}
                             label="Trailer URL"
                             fullWidth
                             margin="normal"

@@ -6,7 +6,7 @@ import { useNavigate } from 'react-router-dom';
 // Using material-ui for the ui
 import { Grid2, Card, CardActionArea, CardMedia, CardContent, Typography, Button, Dialog, DialogTitle, DialogActions } from '@mui/material';
 
-const fallbackImage = 'https://fakeimg.pl/250x330'; // Fallback image URL
+const fallbackImage = 'https://res.cloudinary.com/dfc8ghhcu/image/upload/v1731904682/sans-affiche_gxtbcf.png'; // Fallback image URL
 
 const MoviesList = () => {
     const [movies, setMovies] = useState([]);

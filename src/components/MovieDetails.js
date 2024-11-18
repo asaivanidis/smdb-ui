@@ -4,7 +4,7 @@ import { Box, Card, CardContent, Typography, CardMedia, CircularProgress, Button
 import Carousel from 'react-material-ui-carousel';
 import api from '../smdb-api';
 
-const fallbackImage = 'https://fakeimg.pl/250x330'; // Fallback image URL
+const fallbackImage = 'https://res.cloudinary.com/dfc8ghhcu/image/upload/v1731904682/sans-affiche_gxtbcf.png'; // Fallback image URL
 
 const MovieDetails = () => {
     const { id } = useParams(); // Get the movie ID from the URL
