@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useLocation, useParams, useNavigate } from 'react-router-dom';
-import { Box, Typography, TextField, Button, Card, CardContent, CircularProgress, Dialog, DialogTitle, DialogActions } from '@mui/material';
+import { Box, Typography, TextField, Button, Card, CardContent, CircularProgress, Dialog, DialogTitle, DialogActions, IconButton } from '@mui/material';
+import { Delete as DeleteIcon } from '@mui/icons-material';
 import api from '../smdb-api';
 
 const AddMovieForm = () => {
@@ -117,6 +118,17 @@ const AddMovieForm = () => {
         }
     };
 
+    // Handle deleting the cover image
+    const handleDeleteCover = () => {
+        setCoverImage('');
+    };
+
+    // Handle deleting an additional image
+    const handleDeleteAdditionalImage = (url) => {
+        const updatedImages = additionalImages.filter((imageUrl) => imageUrl !== url);
+        setAdditionalImages(updatedImages);
+    };
+
     return (
         <Box sx={{ padding: '20px' }}>
             <Typography variant="h4" gutterBottom>
@@ -174,13 +186,18 @@ const AddMovieForm = () => {
                             />
                         </Button>
                         {coverImage && (
-                            <Box sx={{ marginTop: 2 }}>
-                                <Typography>Uploaded Cover Image:</Typography>
+                            <Box sx={{ marginTop: 2, position: 'relative', }}>
                                 <img
                                     src={coverImage}
                                     alt="Cover"
                                     style={{ width: '100%', maxHeight: '300px' }}
                                 />
+                                 <IconButton
+                                    onClick={handleDeleteCover}
+                                    sx={{ position: 'absolute', top: 10, right: 10, backgroundColor: 'white' }}
+                                >
+                                    <DeleteIcon color="error" />
+                                </IconButton>
                             </Box>
                         )}
                         {/* Additional Images Upload */}
@@ -203,12 +220,20 @@ const AddMovieForm = () => {
                                 <Typography>Uploaded Additional Images:</Typography>
                                 <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap' }}>
                                     {additionalImages.map((url, index) => (
-                                        <img
-                                            key={index}
-                                            src={url}
-                                            alt={`Additional ${index + 1}`}
-                                            style={{ width: '100px', height: '100px' }}
-                                        />
+                                        <Box sx={{ marginTop: 2, position: 'relative', }}>
+                                            <img
+                                                key={index}
+                                                src={url}
+                                                alt={`Additional ${index + 1}`}
+                                                style={{ width: '160px', height: '120px' }}
+                                            />
+                                            <IconButton
+                                                onClick={() => handleDeleteAdditionalImage(url)}
+                                                sx={{ width: 25, height: 25, position: 'absolute', top: 10, right: 10, backgroundColor: 'white' }}
+                                            >
+                                                <DeleteIcon color="error" width sx={{width: 20, height:20}}/>
+                                            </IconButton>
+                                        </Box>                                       
                                     ))}
                                 </Box>
                             </Box>
