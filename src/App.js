@@ -71,6 +71,7 @@ const App = () => {
                     <Route path="/" element={<MoviesList />} />
                     <Route path="/add" element={<AddMovieForm />} />
                     <Route path="/movie/:id" element={<MovieDetails />} />
+                    <Route path="/edit/:id" element={<AddMovieForm />} />
                 </Routes>
             </Box>
         </ThemeProvider>

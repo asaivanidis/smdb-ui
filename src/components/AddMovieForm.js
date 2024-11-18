@@ -1,8 +1,12 @@
-import React, { useState } from 'react';
-import { Box, Typography, TextField, Button, Card, CardContent, CircularProgress } from '@mui/material';
+import React, { useState, useEffect } from 'react';
+import { useLocation, useParams, useNavigate } from 'react-router-dom';
+import { Box, Typography, TextField, Button, Card, CardContent, CircularProgress, Dialog, DialogTitle, DialogActions } from '@mui/material';
 import api from '../smdb-api';
 
 const AddMovieForm = () => {
+    const { state } = useLocation();
+    const { id } = useParams();
+    const navigate = useNavigate();
     const [title, setTitle] = useState('');
     const [description, setDescription] = useState('');
     const [releaseDate, setReleaseDate] = useState('');
@@ -11,6 +15,23 @@ const AddMovieForm = () => {
     const [trailerUrl, setTrailerUrl] = useState('');
     const [status, setStatus] = useState('idle'); // State to track status
 
+    const [successDialogOpen, setSuccessDialogOpen] = useState(false);
+    const [dialogMessage, setDialogMessage] = useState('');
+
+    // Detect Edit Mode
+    const isInEditMode = Boolean(state?.movie);
+
+    useEffect(() => {
+        if (isInEditMode) {
+            const { movie } = state;
+            setTitle(movie.title);
+            setDescription(movie.description);
+            setReleaseDate(movie.releaseDate);
+            setCoverImage(movie.coverImageUrl);
+            setAdditionalImages(movie.imageUrls || []);
+            setTrailerUrl(movie.trailerUrl);
+        }
+    }, [isInEditMode, state]);
 
     // Function to upload images
     const handleCoverUpload = async (event) => {
@@ -45,42 +66,61 @@ const AddMovieForm = () => {
         e.preventDefault();
         setStatus('loading');
         const newMovie = {
+            movieId: id,
             title,
             description,
             releaseDate,
             coverImageUrl: coverImage,
-            unageUrls: additionalImages,
+            imageUrls: additionalImages,
             trailerUrl,
         };
 
         try {
-            console.log(newMovie) // log the movie object for debugging
+            //console.log(newMovie) // log the movie object for debugging
 
-            await api.addMovie(newMovie);
-            // Movie added successfully
+            if (isInEditMode){
+                await api.updateMovie(id, newMovie);
+                setDialogMessage('Movie updated successfully!');
+
+                
+            }
+            else{
+                await api.addMovie(newMovie);
+                setDialogMessage('Movie added successfully!');
+
+                // Hide success message after 2 seconds
+                setTimeout(() => setStatus('idle'), 1500);
+            }
             setStatus('success'); 
-            // Reset the form fields
+            setSuccessDialogOpen(true);
+        }
+        catch (error){
+            setStatus('error');
+            console.error('Error adding/updating movie:', error);
+            setTimeout(() => setStatus('idle'), 1500);
+        }
+    };
+
+    const handleDialogClose = () => {
+        setSuccessDialogOpen(false);
+    
+        if (isInEditMode) {
+            navigate(`/movie/${id}`); // Redirect to the movie details page
+        } else {
+            // Reset the form for adding a new movie
             setTitle('');
             setDescription('');
             setReleaseDate('');
             setCoverImage('');
-            setAdditionalImages('');
+            setAdditionalImages([]);
             setTrailerUrl('');
-
-            // Hide success message after 2 seconds
-            setTimeout(() => setStatus('idle'), 2000);
-        }
-        catch (error){
-            setStatus('error');
-            console.error('Error adding movie:', error);
-            setTimeout(() => setStatus('idle'), 2000);
         }
     };
 
     return (
         <Box sx={{ padding: '20px' }}>
             <Typography variant="h4" gutterBottom>
-                Add a New Movie
+                {isInEditMode ? 'Edit Movie' : 'Add a New Movie'}            
             </Typography>
             <Card sx={{ maxWidth: 600, margin: '0 auto', backgroundColor: 'background.paper' }}>
                 <CardContent>
@@ -205,6 +245,8 @@ const AddMovieForm = () => {
                                     ? 'Movie Added!'
                                     : status === 'error'
                                     ? 'Adding Failed'
+                                    : isInEditMode
+                                    ? 'Save Changes'
                                     : 'Add Movie'}
                             </Button>
                             {status === 'loading' && (
@@ -223,6 +265,14 @@ const AddMovieForm = () => {
                     </form>
                 </CardContent>
             </Card>
+            <Dialog open={successDialogOpen} onClose={handleDialogClose}>
+                <DialogTitle>{dialogMessage}</DialogTitle>
+                <DialogActions>
+                    <Button onClick={handleDialogClose} color="primary">
+                        OK
+                    </Button>
+                </DialogActions>
+            </Dialog>
         </Box>
     );
 };
