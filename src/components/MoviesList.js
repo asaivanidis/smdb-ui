@@ -73,6 +73,8 @@ const MoviesList = () => {
                                 height: 450, // Fixed height for making sure all movies take up the same space
                                 display: 'flex',
                                 flexDirection: 'column',
+                                justifyContent: 'space-between', // Ensures proper spacing for the delete button
+                                flexDirection: 'column',
                                 
                             }}
                         >
@@ -94,23 +96,54 @@ const MoviesList = () => {
                                         e.target.src = fallbackImage; // If the image cannot be loaded load the fallback image
                                     }}    
                                 />
-                                </CardActionArea>
-                            <CardContent>
+                            </CardActionArea>
+                            <CardContent
+                                sx={{
+                                    flexGrow: 1,
+                                    display: 'flex',
+                                    flexDirection: 'column',
+                                    justifyContent: 'space-between',
+                                    paddingBottom: '8px', // Extra space for button
+                                }}
+                            >
+
                                 {/* Movie Title */}
-                                <Typography variant="h6" component="div" >
+                                <Typography
+                                    variant="h6"
+                                    component="div"
+                                    sx={{
+                                        whiteSpace: 'nowrap',
+                                        overflow: 'hidden',
+                                        textOverflow: 'ellipsis',
+                                    }}
+                                >
                                     {movie.title}
                                 </Typography>
+
                                 {/* Movie Description */}
-                                <Typography variant="body2" color="text.secondary" noWrap> {/* Limit the description to one line */}
+                                <Typography
+                                    variant="body2"
+                                    color="text.secondary"
+                                    noWrap
+                                    sx={{
+                                        overflow: 'hidden',
+                                        textOverflow: 'ellipsis',
+                                        display: '-webkit-box',
+                                        WebkitLineClamp: 2, // Limit to 2 lines
+                                        WebkitBoxOrient: 'vertical',
+                                    }}
+                                >
                                     {movie.description}
                                 </Typography>
+
+                            {/* Delete Button */}
                             </CardContent>    
                             <CardContent sx={{ textAlign: 'center', paddingTop: 0 }}>
                                 <Button
                                     variant="contained"
                                     color="error"
                                     onClick={() => openConfirmDialog(movie.movieId)}
-                                    sx={{ marginTop: '10px' }}
+                                    sx={{ marginTop: '10px', width: '90%' }} // Button styling
                                 >
                                     Delete
                                 </Button>
