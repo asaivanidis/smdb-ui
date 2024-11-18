@@ -1,14 +1,45 @@
 import React, { useState } from 'react';
 import { Box, Typography, TextField, Button, Card, CardContent, CircularProgress } from '@mui/material';
-import { addMovie } from '../smdb-api';
+import api from '../smdb-api';
 
 const AddMovieForm = () => {
     const [title, setTitle] = useState('');
     const [description, setDescription] = useState('');
     const [releaseDate, setReleaseDate] = useState('');
-    const [imageUrl, setImageUrl] = useState('');
+    const [coverImage, setCoverImage] = useState('');
+    const [additionalImages, setAdditionalImages] = useState([]);
     const [trailerUrl, setTrailerUrl] = useState('');
     const [status, setStatus] = useState('idle'); // State to track status
+
+
+    // Function to upload images
+    const handleCoverUpload = async (event) => {
+        const file = event.target.files[0];
+    
+        try {
+          const response = await api.uploadFile(file);
+          setCoverImage(response.url);
+        } catch (error) {
+          console.error('Error uploading image:', error);
+        }
+    };
+
+      // Handle additional images upload
+    const handleAdditionalUpload = async (event) => {
+        const files = event.target.files;
+        const newImages = [...additionalImages];
+
+        try {
+            for (const file of files) {
+                const response = await api.uploadFile(file);
+                newImages.push(response.url);
+            }
+            setAdditionalImages(newImages);
+        } catch (error) {
+            console.error('Error uploading additional images:', error);
+            setStatus('error');
+        }
+    };
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -17,21 +48,23 @@ const AddMovieForm = () => {
             title,
             description,
             releaseDate,
-            imageUrl,
+            coverImageUrl: coverImage,
+            unageUrls: additionalImages,
             trailerUrl,
         };
 
         try {
             console.log(newMovie) // log the movie object for debugging
 
-            await addMovie(newMovie);
+            await api.addMovie(newMovie);
             // Movie added successfully
             setStatus('success'); 
             // Reset the form fields
             setTitle('');
             setDescription('');
             setReleaseDate('');
-            setImageUrl('');
+            setCoverImage('');
+            setAdditionalImages('');
             setTrailerUrl('');
 
             // Hide success message after 2 seconds
@@ -86,15 +119,60 @@ const AddMovieForm = () => {
                             required
                             disabled={status === 'loading'}
                         />
-                        {/* Image URL Field */}
-                        <TextField
-                            label="Image URL"
-                            fullWidth
-                            margin="normal"
-                            value={imageUrl}
-                            onChange={(e) => setImageUrl(e.target.value)}
+                        {/* Cover Image Upload */}
+                        <Button
+                            variant="contained"
+                            component="label"
+                            sx={{ marginTop: 2 }}
                             disabled={status === 'loading'}
-                        />
+                        >
+                            Upload Cover Image
+                            <input
+                                type="file"
+                                hidden
+                                onChange={handleCoverUpload}
+                            />
+                        </Button>
+                        {coverImage && (
+                            <Box sx={{ marginTop: 2 }}>
+                                <Typography>Uploaded Cover Image:</Typography>
+                                <img
+                                    src={coverImage}
+                                    alt="Cover"
+                                    style={{ width: '100%', maxHeight: '300px' }}
+                                />
+                            </Box>
+                        )}
+                        {/* Additional Images Upload */}
+                        <Button
+                            variant="contained"
+                            component="label"
+                            sx={{ marginTop: 2 }}
+                            disabled={status === 'loading'}
+                        >
+                            Upload Additional Images
+                            <input
+                                type="file"
+                                multiple
+                                hidden
+                                onChange={handleAdditionalUpload}
+                            />
+                        </Button>
+                        {additionalImages.length > 0 && (
+                            <Box sx={{ marginTop: 2 }}>
+                                <Typography>Uploaded Additional Images:</Typography>
+                                <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap' }}>
+                                    {additionalImages.map((url, index) => (
+                                        <img
+                                            key={index}
+                                            src={url}
+                                            alt={`Additional ${index + 1}`}
+                                            style={{ width: '100px', height: '100px' }}
+                                        />
+                                    ))}
+                                </Box>
+                            </Box>
+                        )}
                         {/* Trailer URL Field */}
                         <TextField
                             label="Trailer URL"

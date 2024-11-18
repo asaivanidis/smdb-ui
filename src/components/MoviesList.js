@@ -14,34 +14,48 @@ const MoviesList = () => {
     const [movieToDelete, setMovieToDelete] = useState(null); // State to track which movie to delete
     const navigate = useNavigate();
 
-    
+    // Fetch movies
     useEffect(() => {
-        api.get('/')
-            .then(response => setMovies(response.data))
-            .catch(error => console.error('Error fetching movies:', error));
+        const fetchMovies = async () => {
+            try{
+                const response = await api.fetchMovies();
+                setMovies(response);
+            }
+            catch (error){
+                console.error('Error fetching movies:', error);
+            }
+        }
+        fetchMovies()
     }, []);
 
+    // Handle click to navigate to movie details page
     const handleCardClick = (id) => {
         navigate(`/movie/${id}`);
     };
 
+    // Open confirmation dialog before deleting a movie
     const openConfirmDialog = (movieId) => {
         setMovieToDelete(movieId);
         setConfirmOpen(true);
     };
 
-    const handleDelete = () => {
+    // Handle delete
+    const handleDelete = async () => {
         if (movieToDelete) {
-            api.delete(`/${movieToDelete}`)
-                .then(() => {
-                    setMovies(movies.filter(movie => movie.movieId !== movieToDelete));
-                    setConfirmOpen(false);
-                    setMovieToDelete(null);
-                })
-                .catch(error => console.error('Error deleting movie:', error));
+            try {
+                await api.deleteMovie(movieToDelete);
+                setMovies((prevMovies) =>
+                    prevMovies.filter((movie) => movie.movieId !== movieToDelete)
+                );
+                setConfirmOpen(false);
+                setMovieToDelete(null);
+            } catch (error) {
+                console.error('Error deleting movie:', error);
+            }
         }
     };
 
+    // Close confirmation dialog
     const closeConfirmDialog = () => {
         setConfirmOpen(false);
         setMovieToDelete(null);
@@ -67,7 +81,7 @@ const MoviesList = () => {
                                 <CardMedia  
                                     component="img"
                                     height="300"
-                                    image={movie.imageUrl || fallbackImage} // If no url is stored in the database load the fallback image 
+                                    image={movie.coverImageUrl || fallbackImage} // If no url is stored in the database load the fallback image 
                                     alt={movie.title}
                                     sx={{
                                         cursor: 'pointer',

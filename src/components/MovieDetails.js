@@ -11,24 +11,28 @@ const MovieDetails = () => {
     const [loading, setLoading] = useState(true); // To show loading screen while fetching movie
     const [error, setError] = useState(false); // Track if the movie is found
 
+
+    // Fetch movie details
     useEffect(() => {
-        // Fetch movie details
-        api.get(`/${id}`)
-            .then((response) => {
-                if(response.data){
-                    setMovie(response.data)
-                }
-                else{
-                    setError(true); // if the response does not contain data set the error to true
-                }
-                setLoading(false);
-            })
-            // Catch network error
-            .catch((error) => {
-                console.error('Error fetching movie details:', error);
+        const fetchMovieById = async () => {
+        try{
+            const response = await api.fetchMovieById(id);
+            if(response){
+                setMovie(response);
+            }
+            else{
                 setError(true);
-                setLoading(false);
-            });
+            }
+            setLoading(false);
+        }
+        catch (error){
+            setError(true);
+            setLoading(false);
+            console.error(`Error fetching the movie with id ${id}`, error);
+        }
+    }
+    fetchMovieById(id);
+
     }, [id]);
 
     // Show a loading icon while fetching results
@@ -64,7 +68,7 @@ const MovieDetails = () => {
             {/* Movie Poster */}
             <CardMedia
                 component="img"
-                image={movie.imageUrl || fallbackImage} // If no url is stored in the database load the fallback image
+                image={movie.coverImageUrl || fallbackImage} // If no url is stored in the database load the fallback image
                 alt={movie.title}
                 sx={{
                     width: { xs: '100%', sm: '300px' },
